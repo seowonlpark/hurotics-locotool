@@ -1,0 +1,48 @@
+name: locoeval-ci
+on:
+  push:
+  workflow_dispatch:
+    inputs:
+      run_id:
+        description: "hurotics-sales runs.id (없으면 평가를 건너뛴다 — test_corpus는 repo에 없음)"
+        required: false
+        type: string
+jobs:
+  logic-tests:
+    runs-on: windows-latest
+    env:
+      PYTHONIOENCODING: utf-8
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"   # match `python --version` on your PC
+          cache: "pip"
+      - run: pip install -r requirements.txt
+      - name: Unit self-test (fault injection, no exe)
+        run: python selftest.py
+      - name: Fullreport / corpus aggregation self-test (no exe)
+        run: python test_fullreport.py
+  evaluate:
+    runs-on: windows-latest
+    needs: logic-tests
+    env:
+      PYTHONIOENCODING: utf-8
+      RUN_ID: ${{ inputs.run_id }}
+      DASHBOARD_URL: ${{ secrets.DASHBOARD_URL }}
+      ALGO_INGEST_SECRET: ${{ secrets.ALGO_INGEST_SECRET }}
+      VERCEL_PROTECTION_BYPASS_SECRET: ${{ secrets.VERCEL_PROTECTION_BYPASS_SECRET }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"   # same as above
+          cache: "pip"
+      - run: pip install -r requirements.txt
+      - name: Run evaluation
+        run: python ci_run.py
+      # run_id 없이 push로 돌면 스모크 테스트가 건너뛰어져 리포트가 없다 — 그 경우는 통과.
+      - name: Verify both report files were produced and are valid JSON
+        if: inputs.run_id != ''
+        run: |
+                python -c "import json; [json.load(open(f, encoding='utf-8')) for f in ('report_technical.json','report_nontechnical.json')]; print('OK: both reports valid')"

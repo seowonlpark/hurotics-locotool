@@ -1,0 +1,22 @@
+# real trial data -- may contain identifiable movement/locomotion recordings
+cleaned/
+test_corpus/
+*.csv
+
+# proprietary classifier binary -- CI pulls it from the dashboard manifest at run time
+*.exe
+
+# generated reports
+report_technical.json
+report_nontechnical.json
+report_technical_*.json
+report_nontechnical_*.json
+
+# python
+__pycache__/
+*.pyc
+.pytest_cache/
+
+# editor/OS
+.vscode/
+.DS_Store

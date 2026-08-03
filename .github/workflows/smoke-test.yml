@@ -1,0 +1,8 @@
+name: runner-smoke-test
+on: workflow_dispatch
+jobs:
+  hello:
+    runs-on: windows-latest
+    steps:
+      - run: echo "runner works"
+      - run: python --version

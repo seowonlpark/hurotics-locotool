@@ -73,11 +73,6 @@ class TransitionResult:
     late_end_idx: int
     early_start_idx: int
     omission_kind: str | None = None
-    # exact pred-side transition index that resolves this gt transition (jj for early,
-    # j for late -- NOT always == late_end_idx, which can stop early at a transient
-    # intermediate class); None when the transition was missed. Used by nontech.py to
-    # tell "the transition that actually happened" apart from any other pred transition
-    # boundary nearby (e.g. a transient class passed through en route).
     resolved_pred_idx: int | None = None
 
 def _label_arrays(df):
